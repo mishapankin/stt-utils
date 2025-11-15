@@ -1,0 +1,15 @@
+[project]
+name = "stt-aligner"
+version = "0.1.0"
+description = "A minimalistic library to align openai whisper word timestamps with the original text."
+readme = "README.md"
+authors = [{ name = "Mikhail Pankin", email = "mishapankin@gmail.com" }]
+requires-python = ">=3.9"
+dependencies = ["pydantic>=2.10"]
+
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = ["icecream>=2.1.8", "openai>=2.8.0", "pytest>=8.4.2"]
