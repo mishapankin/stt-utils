@@ -3,7 +3,7 @@ import os
 import re
 from dataclasses import dataclass
 import textwrap
-from typing import Optional
+from typing import Optional, Sequence
 import unicodedata
 from pydantic import BaseModel
 
@@ -16,6 +16,7 @@ class UnprocessedTimestamp(BaseModel):
 
 class UnprocessedTranscription(BaseModel):
     text: str
+    duration: float
     words: list[UnprocessedTimestamp]
 
 
@@ -28,43 +29,94 @@ class Timestamp:
 
 
 class Transcription:
+    duration: float
     tokens: list[str]
     timestamps: list[Timestamp]
 
-    def __init__(self, unprocessed: UnprocessedTranscription):
-        text = unprocessed.text
-        self.timestamps = []
+    def __init__(
+        self,
+        duration: float = 0.0,
+        tokens: Optional[list[str]] = None,
+        timestamps: Optional[list[Timestamp]] = None,
+    ):
+        self.duration = duration
+        self.tokens = tokens.copy() if tokens is not None else []
+        self.timestamps = timestamps.copy() if timestamps is not None else []
 
-        self.tokens = [tok for tok in re.split(r"(\w+)", text) if tok != ""]
+    @classmethod
+    def from_unprocessed_transcription(
+        cls,
+        unprocessed: UnprocessedTranscription,
+    ) -> "Transcription":
+        duration = unprocessed.duration
+        tokens = [tok for tok in re.split(r"(\w+)", unprocessed.text) if tok != ""]
+        timestamps = []
 
-        normalized_tokens = [normalize_word(tok) for tok in self.tokens]
+        normalized_tokens = [normalize_word(tok) for tok in tokens]
         timestamped_words = [normalize_word(w.word) for w in unprocessed.words]
 
         matcher = difflib.SequenceMatcher(None, normalized_tokens, timestamped_words)
         for match in matcher.get_matching_blocks():
             for i in range(match.size):
-                idx1 = match.a + i
-                idx2 = match.b + i
+                token_index = match.a + i
+                timestamp_index = match.b + i
 
-                word_info = unprocessed.words[idx2]
+                word_info = unprocessed.words[timestamp_index]
 
                 timestamp = Timestamp(
-                    index=idx1,
+                    index=token_index,
                     start_time=word_info.start,
                     end_time=word_info.end,
                 )
-                self.timestamps.append(timestamp)
+                timestamps.append(timestamp)
+
+        return cls(
+            duration=duration,
+            tokens=tokens,
+            timestamps=timestamps,
+        )
+
+    @classmethod
+    def from_sequence(
+        cls,
+        seq: Sequence["Transcription"],
+        sep: Optional[str] = " ",
+    ) -> "Transcription":
+        duration = sum(t.duration for t in seq)
+        tokens = []
+        timestamps = []
+
+        offset = 0
+        for t in seq:
+            tokens.extend(t.tokens)
+            for ts in t.timestamps:
+                new_ts = Timestamp(
+                    index=ts.index + offset,
+                    start_time=ts.start_time,
+                    end_time=ts.end_time,
+                )
+                timestamps.append(new_ts)
+            offset += len(t.tokens)
+
+            if sep is not None:
+                tokens.append(sep)
+                offset += 1
+
+        return cls(
+            duration=duration,
+            tokens=tokens,
+            timestamps=timestamps,
+        )
 
     def get_text(self) -> str:
         return "".join(self.tokens)
 
     def _get_preview_markers(self) -> str:
-        text = self.get_text()
-        t = [" " * len(c) for c in self.tokens]
+        markers = [" " * len(c) for c in self.tokens]
         for ts in self.timestamps:
-            t[ts.index] = "^" * len(self.tokens[ts.index])
+            markers[ts.index] = "^" * len(self.tokens[ts.index])
 
-        return "".join(t)
+        return "".join(markers)
 
     def get_word_by_timestamp(self, timestamp: Timestamp) -> str:
         return self.tokens[timestamp.index]

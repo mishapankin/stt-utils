@@ -16,12 +16,10 @@ class TestAligner(unittest.TestCase):
             data = file.read()
 
         unprocessed = UnprocessedTranscription.model_validate_json(data)
-        transcription = Transcription(unprocessed)
+        transcription = Transcription.from_unprocessed_transcription(unprocessed)
 
         for ts in transcription.timestamps:
-            self.assertTrue(
-                0 <= ts.start_index < ts.end_index <= len(transcription.text)
-            )
+            self.assertTrue(0 <= ts.index < len(transcription.tokens))
             self.assertTrue(re.match(r"\w+", transcription.get_word_by_timestamp(ts)))
             self.assertIsNotNone(ts.start_time)
             self.assertIsNotNone(ts.end_time)
