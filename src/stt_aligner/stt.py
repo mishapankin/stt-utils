@@ -87,18 +87,18 @@ class Transcription:
         timestamps = []
 
         offset = 0
-        for t in seq:
-            tokens.extend(t.tokens)
-            for ts in t.timestamps:
+        for i, transcription in enumerate(seq):
+            tokens.extend(transcription.tokens)
+            for ts in transcription.timestamps:
                 new_ts = Timestamp(
                     index=ts.index + offset,
                     start_time=ts.start_time,
                     end_time=ts.end_time,
                 )
                 timestamps.append(new_ts)
-            offset += len(t.tokens)
+            offset += len(transcription.tokens)
 
-            if sep is not None:
+            if sep is not None and i < len(seq) - 1:
                 tokens.append(sep)
                 offset += 1
 
