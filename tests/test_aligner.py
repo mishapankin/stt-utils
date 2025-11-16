@@ -23,3 +23,7 @@ class TestAligner(unittest.TestCase):
             self.assertTrue(re.match(r"\w+", transcription.get_word_by_timestamp(ts)))
             self.assertIsNotNone(ts.start_time)
             self.assertIsNotNone(ts.end_time)
+
+
+if __name__ == "__main__":
+    unittest.main()
