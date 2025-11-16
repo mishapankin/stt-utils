@@ -13,6 +13,9 @@ wheels/
 # uv
 uv.lock
 
+# VS Code
+.vscode/
+
 # Virtual environments
 .venv
 
