@@ -61,15 +61,23 @@ class Transcription:
         """Build a Transcription from UnprocessedTranscription by aligning tokens."""
         duration = unprocessed.duration
         tokens = [tok for tok in re.split(r"(\w+)", unprocessed.text) if tok != ""]
-        timestamps = []
 
-        normalized_tokens = [normalize_word(tok) for tok in tokens]
+        tokens_mapping = dict()
+        normalized_tokens = []
+
+        for i, tok in enumerate(tokens):
+            normalized = normalize_word(tok)
+            if normalized != "" and normalized.isalnum():
+                tokens_mapping[len(normalized_tokens)] = i
+                normalized_tokens.append(normalized)
+
         timestamped_words = [normalize_word(w.word) for w in unprocessed.words]
 
+        timestamps = []
         matcher = difflib.SequenceMatcher(None, normalized_tokens, timestamped_words)
         for match in matcher.get_matching_blocks():
             for i in range(match.size):
-                token_index = match.a + i
+                token_index = tokens_mapping[match.a + i]
                 timestamp_index = match.b + i
 
                 word_info = unprocessed.words[timestamp_index]
