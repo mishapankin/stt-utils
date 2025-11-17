@@ -1,4 +1,4 @@
-from .stt import (
+from .transcription import (
     Transcription,
     UnprocessedTranscription,
     UnprocessedTimestamp,

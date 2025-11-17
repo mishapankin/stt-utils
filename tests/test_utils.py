@@ -1,5 +1,5 @@
 import unittest
-from stt_aligner import (
+from stt_utils import (
     normalize_word,
     Transcription,
     UnprocessedTranscription,

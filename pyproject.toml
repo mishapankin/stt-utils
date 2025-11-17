@@ -1,5 +1,5 @@
 [project]
-name = "stt-aligner"
+name = "stt-utils"
 version = "0.1.0"
 description = "A utility library for working with speech-to-text transcriptions."
 readme = "README.md"
@@ -12,6 +12,8 @@ keywords = [
     "speech to text",
     "whisper",
     "alignment",
+    "utility",
+    "audio",
     "timestamps",
     "transcription",
     "closed captions",
@@ -34,6 +36,9 @@ classifiers = [
 ]
 
 dependencies = ["pydantic>=2.10"]
+
+[project.optional-dependencies]
+audio = ["pydub>=0.25.1"]
 
 [build-system]
 requires = ["uv_build>=0.9.9,<0.10.0"]
