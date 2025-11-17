@@ -65,12 +65,14 @@ def find_next_split_point(
     min_silence_len_ms: int,
     audio_length: int,
 ) -> Optional[int]:
+    search_delta = int(segment_delta_ms / 2)
+
     target_split = current_pos + segments_length_ms
-    if target_split >= audio_length:
+    if target_split + search_delta >= audio_length:
         return None
 
-    start_search = int(max(0, target_split - segment_delta_ms / 2))
-    end_search = int(min(audio_length, target_split + segment_delta_ms / 2))
+    start_search = max(0, target_split - search_delta)
+    end_search = min(audio_length, target_split + search_delta)
     search_segment = audio[start_search:end_search]
 
     try:
