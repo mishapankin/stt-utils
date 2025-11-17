@@ -24,6 +24,8 @@ pip install "stt-utils[audio]"
 
 ## Usage
 
+### Python API
+
 Align word timestamps from openai whisper
 ```python
 from stt_utils import UnprocessedTranscription, Transcription
@@ -43,7 +45,7 @@ aligned_transcription.dump_prevew()
 
 Split an audio file in roughly 10 minute segments with splits in moments of silence.
 ```python
-from stt_utils import split_audio_on_silence
+from stt_utils.splitter import split_audio_on_silence
 from pydub import AudioSegment
 
 audio = AudioSegment.from_file("example_audio.mp3")
@@ -52,6 +54,26 @@ splitted = split_audio_on_silence(audio)
 
 for i, segment in enumerate(splitted):
     segment.export(f"segment_{i}.wav")
+```
+
+### Command Line Interface
+
+Split audio files from the command line:
+
+```bash
+python -m stt_utils.splitter audio.mp3 [OPTIONS]
+```
+
+**Options:**
+- `--segment-length FLOAT`: Target segment length in seconds (default: 600)
+- `--segment-delta FLOAT`: Allowed deviation from segment length in seconds (default: 30)
+- `--silence-thresh-delta INT`: Silence threshold delta in dB (default: -16)
+- `--min-silence-len FLOAT`: Minimum silence length in seconds (default: 0.5)
+- `--output-dir PATH`: Output directory for split segments (default: current directory)
+
+**Example:**
+```bash
+python -m stt_utils.splitter audio.mp3 --segment-length 600 --output-dir ./segments
 ```
 
 ## Development

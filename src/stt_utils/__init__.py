@@ -4,7 +4,6 @@ __all__ = [
     "UnprocessedTimestamp",
     "Timestamp",
     "normalize_word",
-    "split_audio_on_silence",
 ]
 
 from .transcription import (
@@ -14,5 +13,3 @@ from .transcription import (
     Timestamp,
     normalize_word,
 )
-
-from .splitter import split_audio_on_silence
