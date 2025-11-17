@@ -5,6 +5,19 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
+.python-version
+.mypy_cache/
+.ruff_cache/
+
+# uv
+uv.lock
+
+# VS Code
+.vscode/
 
 # Virtual environments
 .venv
+
+.env
+.env.local
