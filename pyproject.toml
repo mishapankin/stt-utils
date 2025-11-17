@@ -37,6 +37,12 @@ classifiers = [
 
 dependencies = ["pydantic>=2.10"]
 
+[project.urls]
+Homepage = "https://github.com/mishapankin/stt-utils"
+Repository = "https://github.com/mishapankin/stt-utils"
+Documentation = "https://github.com/mishapankin/stt-utils#readme"
+Issues = "https://github.com/mishapankin/stt-utils/issues"
+
 [project.optional-dependencies]
 audio = ["pydub>=0.25.1"]
 
