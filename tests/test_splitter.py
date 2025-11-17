@@ -1,8 +1,7 @@
 import unittest
 from pydub.generators import Sine
 from pydub import AudioSegment
-from stt_utils import split_audio_on_silence
-from stt_utils.splitter import find_split_points
+from stt_utils.splitter import split_audio_on_silence
 
 
 class TestSplitter(unittest.TestCase):
