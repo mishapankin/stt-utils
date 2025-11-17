@@ -1,3 +1,5 @@
+"""Audio splitting utilities for speech-to-text processing."""
+
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -33,6 +35,7 @@ def find_split_points(
     silence_thresh_delta: int,
     min_silence_len_ms: int,
 ) -> list[int]:
+    """Find split points in audio based on silence detection."""
     split_points = []
     current_pos = 0
     audio_length = len(audio)
@@ -65,6 +68,7 @@ def find_next_split_point(
     min_silence_len_ms: int,
     audio_length: int,
 ) -> Optional[int]:
+    """Find the next optimal split point in audio based on silence."""
     search_delta = int(segment_delta_ms / 2)
 
     target_split = current_pos + segments_length_ms
@@ -105,6 +109,7 @@ def split_audio_at_points(
     audio: "AudioSegment",
     split_points: list[int],
 ) -> list["AudioSegment"]:
+    """Split audio into segments at specified time points."""
     segments = []
     prev_pos = 0
     for point in split_points:

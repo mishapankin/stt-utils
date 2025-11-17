@@ -1,3 +1,5 @@
+"""Utilities for working with transcriptions."""
+
 import difflib
 import os
 import re
@@ -9,12 +11,16 @@ from pydantic import BaseModel
 
 
 class UnprocessedTimestamp(BaseModel):
+    """Represents a timestamped word from raw transcription output."""
+
     start: float
     end: float
     word: str
 
 
 class UnprocessedTranscription(BaseModel):
+    """Raw transcription data with timestamps for individual words returned by openai whisper"""
+
     text: str
     duration: float
     words: list[UnprocessedTimestamp]
@@ -22,6 +28,8 @@ class UnprocessedTranscription(BaseModel):
 
 @dataclass
 class Timestamp:
+    """Timestamp information for a token in processed transcription."""
+
     index: int
 
     start_time: float
@@ -29,6 +37,8 @@ class Timestamp:
 
 
 class Transcription:
+    """Processed transcription with aligned tokens and timestamps."""
+
     duration: float
     tokens: list[str]
     timestamps: list[Timestamp]
@@ -48,6 +58,7 @@ class Transcription:
         cls,
         unprocessed: UnprocessedTranscription,
     ) -> "Transcription":
+        """Build a Transcription from UnprocessedTranscription by aligning tokens."""
         duration = unprocessed.duration
         tokens = [tok for tok in re.split(r"(\w+)", unprocessed.text) if tok != ""]
         timestamps = []
@@ -82,6 +93,7 @@ class Transcription:
         seq: Sequence["Transcription"],
         sep: Optional[str] = " ",
     ) -> "Transcription":
+        """Build a Transcription from merging multiple Transcriptions into one with adjusted indices."""
         duration = sum(t.duration for t in seq)
         tokens = []
         timestamps = []
@@ -109,9 +121,11 @@ class Transcription:
         )
 
     def get_text(self) -> str:
+        """Get the full text by joining all tokens."""
         return "".join(self.tokens)
 
     def _get_preview_markers(self) -> str:
+        """Generate marker string showing timestamped positions."""
         markers = [" " * len(c) for c in self.tokens]
         for ts in self.timestamps:
             markers[ts.index] = "^" * len(self.tokens[ts.index])
@@ -119,12 +133,15 @@ class Transcription:
         return "".join(markers)
 
     def get_word_by_timestamp(self, timestamp: Timestamp) -> str:
+        """Get the token corresponding to a timestamp."""
         return self.tokens[timestamp.index]
 
     def dumps_preview(self) -> str:
+        """Generate a preview string with text and timestamp markers under without wrapping."""
         return self.get_text() + "\n" + self._get_preview_markers()
 
     def dumps_preview_wrapped(self, width: int) -> str:
+        """Generate wrapped preview with text and markers at specified width."""
         if width <= 0:
             raise ValueError("Wrapping width must be positive")
 
@@ -154,6 +171,7 @@ class Transcription:
         return "\n".join(output_lines)
 
     def dump_preview(self, width: Optional[int] = None) -> None:
+        """Print preview to console, wrapping to terminal width if possible."""
         if width is None:
             try:
                 width = os.get_terminal_size().columns
@@ -164,6 +182,7 @@ class Transcription:
 
 
 def normalize_word(word: str) -> str:
+    """Normalize a word by lowercasing and removing diacritics."""
     word = word.lower().strip()
     word = unicodedata.normalize("NFD", word)
     word = "".join(c for c in word if unicodedata.category(c) != "Mn")
