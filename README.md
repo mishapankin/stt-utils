@@ -54,6 +54,9 @@ for i, segment in enumerate(splitted):
     segment.export(f"segment_{i}.wav")
 ```
 
+## Development
+It is recomended to use [uv](https://docs.astral.sh/uv/) toolset for development.
+
 ## Testing
 There are unittests available in the `tests/` directory.
 ```
