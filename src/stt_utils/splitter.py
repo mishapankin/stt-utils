@@ -1,38 +1,37 @@
-try:
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
     from pydub import AudioSegment
-    from pydub.silence import detect_silence
-except ImportError:
-    raise ImportError(
-        "pydub is required for audio splitting. Install optional audio support: pip install stt-utils[audio]."
-    )
 
-from typing import Optional
+AUDIO_DEPENDENCY_ERROR = ImportError(
+    "Optional audio dependencies are required. Please install them via 'pip install stt-utils[audio]'"
+)
 
 
-# Split a pydub AudioSegment into smaller segments with length of segments_approx_length_ms ± delta_ms on the longest silence.
 def split_audio_on_silence(
-    audio: AudioSegment,
-    segments_approx_length_ms: int,
-    segment_delta_ms: int,
-    silence_thresh_delta=-16,
-    min_silence_len_ms=500,
-) -> list[AudioSegment]:
+    audio: "AudioSegment",
+    segment_length: float = 600.0,  # in seconds
+    segment_delta: float = 30.0,  # in seconds
+    silence_thresh_delta: int = -16,  # in dB
+    min_silence_len_ms: float = 0.5,  # in seconds
+) -> list["AudioSegment"]:
+    """Split a pydub AudioSegment into smaller segments with length = (segment_length ± segment_delta) by the longest silences."""
     split_points = find_split_points(
         audio,
-        segments_approx_length_ms,
-        segment_delta_ms,
+        int(segment_length * 1000),
+        int(segment_delta * 1000),
         silence_thresh_delta,
-        min_silence_len_ms,
+        int(min_silence_len_ms * 1000),
     )
     return split_audio_at_points(audio, split_points)
 
 
 def find_split_points(
-    audio: AudioSegment,
-    segments_approx_length_ms: int,
+    audio: "AudioSegment",
+    segment_length_ms: int,
     segment_delta_ms: int,
-    silence_thresh_delta=-16,
-    min_silence_len_ms=500,
+    silence_thresh_delta: int,
+    min_silence_len_ms: int,
 ) -> list[int]:
     split_points = []
     current_pos = 0
@@ -43,7 +42,7 @@ def find_split_points(
         split_point = find_next_split_point(
             audio,
             current_pos,
-            segments_approx_length_ms,
+            segment_length_ms,
             segment_delta_ms,
             silence_thresh,
             min_silence_len_ms,
@@ -58,21 +57,26 @@ def find_split_points(
 
 
 def find_next_split_point(
-    audio: AudioSegment,
+    audio: "AudioSegment",
     current_pos: int,
-    segments_approx_length_ms: int,
+    segments_length_ms: int,
     segment_delta_ms: int,
     silence_thresh: int,
     min_silence_len_ms: int,
     audio_length: int,
 ) -> Optional[int]:
-    target_split = current_pos + segments_approx_length_ms
+    target_split = current_pos + segments_length_ms
     if target_split >= audio_length:
         return None
 
-    start_search = max(0, target_split - segment_delta_ms)
-    end_search = min(audio_length, target_split + segment_delta_ms)
+    start_search = int(max(0, target_split - segment_delta_ms / 2))
+    end_search = int(min(audio_length, target_split + segment_delta_ms / 2))
     search_segment = audio[start_search:end_search]
+
+    try:
+        from pydub.silence import detect_silence
+    except ImportError:
+        raise AUDIO_DEPENDENCY_ERROR
 
     silences = detect_silence(
         search_segment,
@@ -96,8 +100,9 @@ def find_next_split_point(
 
 
 def split_audio_at_points(
-    audio: AudioSegment, split_points: list[int]
-) -> list[AudioSegment]:
+    audio: "AudioSegment",
+    split_points: list[int],
+) -> list["AudioSegment"]:
     segments = []
     prev_pos = 0
     for point in split_points:
