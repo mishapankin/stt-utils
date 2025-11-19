@@ -63,7 +63,7 @@ class Transcription:
         tokens = [tok for tok in re.split(r"(\w+)", unprocessed.text) if tok != ""]
 
         tokens_mapping = dict()
-        normalized_tokens = []
+        normalized_tokens: list[str] = []
 
         for i, tok in enumerate(tokens):
             normalized = normalize_word(tok)
