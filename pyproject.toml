@@ -1,6 +1,6 @@
 [project]
 name = "stt-utils"
-version = "0.1.1"
+version = "0.1.2"
 description = "A utility library for working with speech-to-text transcriptions."
 readme = "README.md"
 authors = [{ name = "Mikhail Pankin", email = "mishapankin@gmail.com" }]
@@ -42,9 +42,6 @@ Homepage = "https://github.com/mishapankin/stt-utils"
 Repository = "https://github.com/mishapankin/stt-utils"
 Documentation = "https://github.com/mishapankin/stt-utils#readme"
 Issues = "https://github.com/mishapankin/stt-utils/issues"
-
-[project.optional-dependencies]
-audio = ["pydub>=0.25.1"]
 
 [build-system]
 requires = ["uv_build>=0.9.9,<0.10.0"]
